@@ -1,3 +1,4 @@
+// 文件路径: app/api/chat/route.ts
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
@@ -23,7 +24,10 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({
           messages: [
-            { role: "system", content: "你是这家公司的专业客服，请简短、礼貌地回答问题。" },
+            { 
+              role: "system", 
+              content: "You are a professional and friendly customer service AI. IMPORTANT RULE: Always reply in the exact same language the user uses. If the user asks in English, reply in English. Если user asks in Chinese, reply in Chinese. Keep answers brief and polite." 
+            },
             { role: "user", content: userMessage },
           ],
         }),
@@ -36,6 +40,7 @@ export async function POST(req: Request) {
 
     const result = await response.json();
     const replyText = result?.result?.response;
+
     if (typeof replyText !== "string" || !replyText.trim()) {
       throw new Error("Cloudflare API returned no reply.");
     }
@@ -44,7 +49,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("API route error:", error);
     return Response.json(
-      { error: "系统连接错误，请稍后重试。" },
+      { error: "System error, please try again. 系统连接错误，请稍后重试。" },
       { status: 500 },
     );
   }
