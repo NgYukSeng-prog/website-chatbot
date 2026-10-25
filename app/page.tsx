@@ -18,9 +18,6 @@ export default function ChatWidget() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // 机器人位于右下角 (x: 100%, y: 100%)
-      // 公式计算后，x 和 y 最大被 Math.min 限制为 0 (绝不向右/向下看)
-      // Math.max 限制它向左/向上看的最大像素为 -7
       const rawX = (e.clientX / window.innerWidth - 1) * 10;
       const rawY = (e.clientY / window.innerHeight - 1) * 10;
       
@@ -85,20 +82,26 @@ export default function ChatWidget() {
             <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px' }}>✖</button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', backgroundColor: '#f9f9f9' }}>
+          {/* 
+            Update 1: Changed backgroundColor from '#f9f9f9' to '#e4e4e7' 
+            to create contrast against the white bot bubbles.
+          */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', backgroundColor: '#e4e4e7' }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '12px' }}>
                 <span style={{
-                  background: msg.role === 'user' ? '#0070f3' : '#fff',
+                  background: msg.role === 'user' ? '#0070f3' : '#ffffff',
                   color: msg.role === 'user' ? '#fff' : '#333',
-                  padding: '10px 14px',
+                  padding: '12px 16px',
                   borderRadius: '12px',
                   display: 'inline-block',
                   maxWidth: '85%',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)', // Slightly stronger shadow
                   fontSize: '14px',
                   lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap'
+                  whiteSpace: 'pre-wrap',
+                  // Update 2: Added text-align justify to make the text edges neat
+                  textAlign: 'justify'
                 }}>
                   {msg.content}
                 </span>
@@ -121,7 +124,7 @@ export default function ChatWidget() {
         </div>
       )}
 
-      {/* 调整坐标后的悬浮机器人 */}
+      {/* 悬浮机器人 UI */}
       <div 
         onClick={() => setIsOpen(!isOpen)}
         style={{
@@ -136,23 +139,18 @@ export default function ChatWidget() {
         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
         <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          {/* 用户指定的新版天线 */}
           <line x1="50" y1="30" x2="50" y2="10" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
           <circle cx="50" cy="10" r="5" fill={isOpen ? "#22c55e" : "#ef4444"} />
           
-          {/* 整体向右平移居中的身体底座 */}
           <rect x="35" y="70" width="30" height="25" fill="#cbd5e1" rx="4" />
           <path d="M 25 95 L 75 95 L 85 100 L 15 100 Z" fill="#94a3b8" />
           
-          {/* 整体向右平移居中的头与眼罩 */}
           <rect x="15" y="25" width="70" height="55" fill="#0070f3" rx="16" />
           <rect x="25" y="35" width="50" height="30" fill="#1e293b" rx="8" />
           
-          {/* 居中后的眼睛白底 */}
           <circle cx="37" cy="50" r="9" fill="white" />
           <circle cx="63" cy="50" r="9" fill="white" />
           
-          {/* 受限制的黑色眼珠 */}
           <circle cx={37 + pupilOffset.x} cy={50 + pupilOffset.y} r="4" fill="#0f172a" />
           <circle cx={63 + pupilOffset.x} cy={50 + pupilOffset.y} r="4" fill="#0f172a" />
         </svg>
