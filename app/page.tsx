@@ -1,6 +1,6 @@
 // 文件路径: app/page.tsx
 'use client';
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 
 type Message = {
   role: 'ai' | 'user';
@@ -13,7 +13,21 @@ export default function ChatWidget() {
     { role: 'ai', content: 'Hello! How can I help you today? / 您好！有什么我可以帮您？' },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false); // 控制聊天框打开/关闭
+  const [isOpen, setIsOpen] = useState(false);
+  
+  // 用于追踪鼠标位置以控制机器人眼珠
+  const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // 计算鼠标在屏幕上的相对位置，转化为眼珠的偏移量 (最大偏移约 6px)
+      const x = (e.clientX / window.innerWidth - 0.5) * 12;
+      const y = (e.clientY / window.innerHeight - 0.5) * 12;
+      setPupilOffset({ x, y });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,7 +62,7 @@ export default function ChatWidget() {
   return (
     <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999, fontFamily: 'sans-serif' }}>
       
-      {/* 聊天框 (仅在 isOpen 为 true 时显示) */}
+      {/* 聊天框弹窗 */}
       {isOpen && (
         <div style={{
           width: '350px',
@@ -60,15 +74,14 @@ export default function ChatWidget() {
           flexDirection: 'column',
           overflow: 'hidden',
           marginBottom: '16px',
-          border: '1px solid #eaeaea'
+          border: '1px solid #eaeaea',
+          animation: 'fadeIn 0.3s ease'
         }}>
-          {/* 顶部导航栏 */}
           <div style={{ backgroundColor: '#0070f3', color: 'white', padding: '16px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>🤖 AI 客服 (AI Support)</span>
+            <span>Synmac AI Support</span>
             <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px' }}>✖</button>
           </div>
 
-          {/* 聊天记录区域 */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', backgroundColor: '#f9f9f9' }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '12px' }}>
@@ -81,7 +94,8 @@ export default function ChatWidget() {
                   maxWidth: '85%',
                   boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
                   fontSize: '14px',
-                  lineHeight: '1.5'
+                  lineHeight: '1.5',
+                  whiteSpace: 'pre-wrap' // 确保分段显示正常
                 }}>
                   {msg.content}
                 </span>
@@ -89,45 +103,57 @@ export default function ChatWidget() {
             ))}
           </div>
 
-          {/* 底部输入框 */}
           <form onSubmit={sendMessage} style={{ display: 'flex', padding: '12px', backgroundColor: '#fff', borderTop: '1px solid #eee' }}>
             <input 
               value={input} 
               onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)} 
               style={{ flex: 1, padding: '10px 16px', borderRadius: '20px', border: '1px solid #ddd', outline: 'none' }} 
-              placeholder="Type a message..." 
+              placeholder="Type your question..." 
               disabled={isLoading}
             />
             <button type="submit" style={{ marginLeft: '8px', padding: '0 16px', borderRadius: '20px', backgroundColor: '#0070f3', color: 'white', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer' }} disabled={isLoading}>
-              {isLoading ? '...' : '发送'}
+              {isLoading ? '...' : 'Send'}
             </button>
           </form>
         </div>
       )}
 
-      {/* 悬浮的可爱机器人按钮 */}
-      <button 
+      {/* 悬浮的可爱机器人 */}
+      <div 
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          backgroundColor: '#0070f3',
-          border: 'none',
-          fontSize: '30px',
-          cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(0,112,243,0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          width: '80px',
+          height: '100px',
           float: 'right',
-          transition: 'transform 0.2s', // 添加按压动画
+          cursor: 'pointer',
+          transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          transformOrigin: 'bottom center'
         }}
         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
-        {isOpen ? <span style={{color: 'white', fontSize:'20px'}}>✖</span> : '🤖'}
-      </button>
+        <svg width="80" height="100" viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg">
+          {/* 天线 */}
+          <line x1="40" y1="20" x2="40" y2="5" stroke="#94a3b8" strokeWidth="3" />
+          <circle cx="40" cy="5" r="4" fill={isOpen ? "#22c55e" : "#ef4444"} />
+          
+          {/* 身体底座 */}
+          <rect x="25" y="70" width="30" height="25" fill="#cbd5e1" rx="4" />
+          <path d="M 15 95 L 65 95 L 75 100 L 5 100 Z" fill="#94a3b8" />
+          
+          {/* 机器人的头 */}
+          <rect x="5" y="20" width="70" height="55" fill="#0070f3" rx="16" />
+          <rect x="15" y="30" width="50" height="30" fill="#1e293b" rx="8" />
+          
+          {/* 眼睛白底 */}
+          <circle cx="27" cy="45" r="9" fill="white" />
+          <circle cx="53" cy="45" r="9" fill="white" />
+          
+          {/* 会跟随鼠标移动的黑色眼珠 */}
+          <circle cx={27 + pupilOffset.x} cy={45 + pupilOffset.y} r="4" fill="#0f172a" />
+          <circle cx={53 + pupilOffset.x} cy={45 + pupilOffset.y} r="4" fill="#0f172a" />
+        </svg>
+      </div>
 
     </div>
   );
