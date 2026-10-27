@@ -8,6 +8,14 @@ export async function POST(req: Request) {
       return Response.json({ error: "请输入有效的问题。" }, { status: 400 });
     }
 
+    const hasChinese = /[\u3400-\u4dbf\u4e00-\u9fff]/u.test(userMessage);
+    const hasEnglish = /[a-z]/i.test(userMessage);
+    const languageInstruction = hasChinese && hasEnglish
+      ? "Reply mainly in Simplified Chinese, using only a small amount of English where it is natural or necessary."
+      : hasChinese
+        ? "Reply only in Simplified Chinese."
+        : "Reply only in English.";
+
     const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
     const apiToken = process.env.CLOUDFLARE_API_TOKEN;
     if (!accountId || !apiToken) {
@@ -27,7 +35,11 @@ export async function POST(req: Request) {
             { 
               role: "system", 
               content: `You are a professional and friendly customer service AI for Synmac (S) Pte Ltd and Synmac Precision Sdn Bhd[cite: 3]. 
-              IMPORTANT RULE: Always reply in the exact same language the user uses.
+              IMPORTANT LANGUAGE RULES:
+              - You may reply only in English or Simplified Chinese. Never reply in Hindi, Indian languages, Malay, Japanese, Korean, or any other language.
+              - Follow this per-message language instruction exactly: ${languageInstruction}
+              - Do not switch languages because of the user's device, location, name, or browser settings.
+              - Keep company names, email addresses, phone numbers, product names, and technical terms in their original form when appropriate.
               
               Here is your core knowledge base to answer customer questions:
               
