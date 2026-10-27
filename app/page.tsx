@@ -142,8 +142,11 @@ export default function ChatWidget() {
           <line x1="50" y1="30" x2="50" y2="10" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
           <circle cx="50" cy="10" r="5" fill={isOpen ? "#22c55e" : "#ef4444"} />
           
-          <rect x="35" y="70" width="30" height="25" fill="#cbd5e1" rx="4" />
+          <rect x="27" y="70" width="46" height="25" fill="#cbd5e1" rx="4" />
           <path d="M 25 95 L 75 95 L 85 100 L 15 100 Z" fill="#94a3b8" />
+          <text x="50" y="90" textAnchor="middle" fill="#1e293b" fontSize="6" fontWeight="bold" fontFamily="Arial, sans-serif">
+            Synmac
+          </text>
           
           <rect x="15" y="25" width="70" height="55" fill="#0070f3" rx="16" />
           <rect x="25" y="35" width="50" height="30" fill="#1e293b" rx="8" />
