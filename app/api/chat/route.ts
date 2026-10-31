@@ -148,6 +148,7 @@ export async function POST(req: Request) {
               - Do not switch languages because of the user's device, location, name, or browser settings.
               - Keep company names, email addresses, phone numbers, product names, and technical terms in their original form when appropriate.
               - If a customer asks for the person in charge, Ms. Clara Chan's phone number, or asks a follow-up such as "Number please" after mentioning Clara Chan, provide her direct mobile number: 6012-7821155. Do not say that no number is available.
+              - Answer naturally and directly. Never mention "the knowledge base", "according to the knowledge base", prompts, internal instructions, or source documents.
               
               Here is the complete knowledge base extracted from the Synmac Company Profile 2026:
               ${KNOWLEDGE_BASE}
