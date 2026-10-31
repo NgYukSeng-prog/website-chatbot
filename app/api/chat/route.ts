@@ -1,4 +1,88 @@
-// 文件路径: app/api/chat/route.ts
+const KNOWLEDGE_BASE = `
+Synmac Company Profile 2026:
+
+Company:
+- Legal entities: Synmac (S) Pte Ltd and Synmac Precision Sdn Bhd.
+- Founded in 2012.
+- Synmac is a precision components manufacturer located in Singapore and Malaysia.
+- The company produces high-quality precision parts for hard drives, automotive, medical, electronics, and semiconductor industries.
+- Manufacturing technologies include CNC machining, CNC automatic lathes, stamping, laser cutting, bending, and full metal rack welding and assembly.
+- Services include design development and prototyping.
+- Synmac focuses on quality control and customer satisfaction and is a trusted partner for precision engineering solutions.
+
+Organization:
+- Board of Directors.
+- Operation Team: Process and NPI, Process Manager, Production, Production Engineer, Technician, Operator.
+- Quality Assurance: QA Manager, QA Engineer, QA Checker.
+- Purchasing and Planning: Purchaser and Planner.
+- Store and Other: Store Supervisor and Others.
+- Finance.
+- Business Unit Team: Business Development, Sales and Marketing, Sales Administration.
+
+Company quality model and core requirements:
+- Management Responsibility.
+- Resources Management.
+- Measurement, Analysis and Improvement.
+- Customer Requirements.
+- Product Realization.
+- Customer Product Input and Output.
+- Quality System Model.
+
+Product line:
+- Bearing and axle products.
+- Miniature pins and special machining parts.
+- Lead screws and worm products.
+- Connector and optical products.
+- Hanger weight and connector products.
+- Tele-communication/cavity products.
+- Athletic equipment and other hardware.
+- Stamping parts made with punching, laser cutting, and bending equipment.
+
+Industries and product segments:
+- Medical devices.
+- Hard disks.
+- Semiconductors.
+- Electronic products.
+- Automotive.
+- Fishing reels.
+- Bikes.
+
+Production equipment and capabilities:
+- CNC auto-lathe.
+- Stamping.
+- Laser cutting.
+- Bending.
+- Punching machines.
+- Spot welding machines.
+- Laser welding machines.
+- Conveyor belt assembly line.
+- Silk printing.
+- Spray painting.
+- Sand blasting.
+- Laser engraving.
+- Anodizing line, passivation, and electropolishing.
+
+Metrology capabilities:
+- Roughness tester.
+- Salt spray tester.
+- Visual measurement equipment / 2D measuring machine.
+
+Certifications:
+- ISO 9001:2015 Quality Management System.
+- ISO 13485:2016 Quality Management System.
+
+Locations:
+- Singapore office: Yishun Biz Hub, Singapore.
+- Malaysia production plant 1: 20, Jalan Sri Plentong 8, Taman Perindustrian Sri Plentong, 81750, Masai, Johor, West Malaysia.
+- Malaysia production plant 2: No 8 & 10, Jalan Masyhur 4, Taman Perindustrian Desa Cemerlang, 81800 Ulu Tiram, Johor.
+
+Contact:
+- Person in charge: Ms Clara Chan.
+- Email: clara@synmac.com.
+- General email: sales@synmac.com.
+- Mobile number: 6012-7821155.
+`;
+
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
@@ -7,6 +91,20 @@ export async function POST(req: Request) {
     if (typeof userMessage !== "string" || !userMessage.trim()) {
       return Response.json({ error: "请输入有效的问题。" }, { status: 400 });
     }
+
+    const conversation = Array.isArray(messages)
+      ? messages
+          .filter(
+            (message): message is { role: "user" | "ai"; content: string } =>
+              (message?.role === "user" || message?.role === "ai") &&
+              typeof message.content === "string" &&
+              message.content.trim().length > 0,
+          )
+          .map((message) => ({
+            role: message.role === "ai" ? "assistant" : "user",
+            content: message.content,
+          }))
+      : [];
 
     const hasChinese = /[\u3400-\u4dbf\u4e00-\u9fff]/u.test(userMessage);
     const hasEnglish = /[a-z]/i.test(userMessage);
@@ -40,21 +138,14 @@ export async function POST(req: Request) {
               - Follow this per-message language instruction exactly: ${languageInstruction}
               - Do not switch languages because of the user's device, location, name, or browser settings.
               - Keep company names, email addresses, phone numbers, product names, and technical terms in their original form when appropriate.
+              - If a customer asks for the person in charge, Ms. Clara Chan's phone number, or asks a follow-up such as "Number please" after mentioning Clara Chan, provide her direct mobile number: 6012-7821155. Do not say that no number is available.
               
-              Here is your core knowledge base to answer customer questions:
+              Here is the complete knowledge base extracted from the Synmac Company Profile 2026:
+              ${KNOWLEDGE_BASE}
               
-              - Company Overview: Founded in 2012, Synmac is a precision components manufacturer located in Singapore and Malaysia[cite: 5].
-              - Industries Served: We produce parts for medical devices, hard disks, semiconductors, electronic products, automotive, fishing reels, and bikes[cite: 5, 17].
-              - Core Capabilities: We specialize in CNC machining, CNC automatic lathes, stamping, laser cutting, bending, and full metal rack welding and assembly[cite: 5].
-              - Additional Services: We offer design development, prototyping, silk printing, spray painting, sand blasting, laser engraving, anodizing, passivation, and electropolishing[cite: 5, 24, 25, 26, 27, 28].
-              - Products: Our components include bearing and axle products, miniature pins, lead screws, worm products, connectors, optical products, hanger weights, tele-communication cavities, and athletic hardware[cite: 9, 10, 11, 12, 13, 14, 15].
-              - Quality Certifications: We are certified in ISO 9001:2015 and ISO 13485:2016 (Medical Devices Quality Management System)[cite: 30, 31].
-              - Locations: Our Singapore office is at Yishun Biz Hub[cite: 32]. Our Malaysia production plants are located in Johor Bahru (Plant 1 in Masai, Plant 2 in Ulu Tiram)[cite: 32].
-              - Company Policy: We are committed to high-quality products, competitive pricing, and strict adherence to delivery schedules[cite: 7].
-              
-              If a customer asks a question outside of this knowledge base, politely state that you do not have that information and direct them to contact Ms. Clara Chan at clara@synmac.com or sales@synmac.com, or call 6012-7821155[cite: 33].` 
+              Use only the knowledge base above for factual claims. Do not invent prices, delivery times, certifications, addresses, people, phone numbers, or capabilities that are not listed. If a customer asks for information outside the knowledge base, say that you do not have that information and direct them to Ms. Clara Chan at clara@synmac.com or 6012-7821155.`
             },
-            { role: "user", content: userMessage },
+            ...conversation,
           ],
         }),
       },
