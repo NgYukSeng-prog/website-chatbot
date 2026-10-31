@@ -113,6 +113,15 @@ export async function POST(req: Request) {
       : hasChinese
         ? "Reply only in Simplified Chinese."
         : "Reply only in English.";
+    const asksForContact = /\b(contact|reach|phone|mobile|number|email|quotation|quote|inquir(?:y|ies))\b/i.test(userMessage)
+      || /联系|电话|手机|号码|邮箱|报价|询价/.test(userMessage);
+
+    if (asksForContact) {
+      const reply = hasChinese
+        ? "如需报价或其他询问，请联系负责人 Ms. Clara Chan：6012-7821155；邮箱：clara@synmac.com。"
+        : "For quotations or other inquiries, please contact Ms. Clara Chan at 6012-7821155 or clara@synmac.com.";
+      return Response.json({ reply });
+    }
 
     const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
     const apiToken = process.env.CLOUDFLARE_API_TOKEN;
@@ -147,6 +156,8 @@ export async function POST(req: Request) {
             },
             ...conversation,
           ],
+          max_tokens: 256,
+          temperature: 0.2,
         }),
       },
     );
