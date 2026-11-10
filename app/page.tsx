@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 
 type Message = {
   role: 'ai' | 'user';
@@ -12,23 +12,6 @@ export default function ChatWidget() {
     { role: 'ai', content: 'Hello! How can I help you today? / 您好！有什么我可以帮您？' },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  
-  const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const rawX = (e.clientX / window.innerWidth - 1) * 10;
-      const rawY = (e.clientY / window.innerHeight - 1) * 10;
-      
-      const x = Math.max(-7, Math.min(0, rawX));
-      const y = Math.max(-7, Math.min(0, rawY));
-      
-      setPupilOffset({ x, y });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   const sendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,115 +44,54 @@ export default function ChatWidget() {
   };
 
   return (
-    <div style={{ 
-      position: 'fixed', 
-      bottom: '10px', 
-      right: '10px', 
-      zIndex: 9999, 
-      fontFamily: 'sans-serif',
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: '#fff',
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'flex-end',
-      justifyContent: 'flex-end',
-      /* RESPONSIVE MAGIC STARTS HERE */
-      width: 'calc(100vw - 20px)',  // Adapts to small mobile screens safely
-      maxWidth: '350px',            // Caps the width perfectly for Laptops/iPads
-      height: 'calc(100vh - 20px)', // Prevents vertical clipping on mobile
-      maxHeight: '620px',           // Caps total height for standard screens
-      pointerEvents: 'none'         // Allows clicking through empty space
+      fontFamily: 'sans-serif',
+      overflow: 'hidden'
     }}>
-      
-      {isOpen && (
-        <div style={{
-          width: '100%',
-          flexGrow: 1,                // Auto-expands to fill available height above the robot
-          maxHeight: '500px',         // Caps chat window height
-          backgroundColor: '#fff',
-          borderRadius: '16px',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          marginBottom: '16px',
-          border: '1px solid #eaeaea',
-          animation: 'fadeIn 0.3s ease',
-          pointerEvents: 'auto'       // Re-enables clicking inside the chat window
-        }}>
-          <div style={{ backgroundColor: '#0070f3', color: 'white', padding: '16px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Synmac AI Support</span>
-            <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px', padding: '0 5px' }}>✖</button>
-          </div>
-
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', backgroundColor: '#e4e4e7' }}>
-            {messages.map((msg, i) => (
-              <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '12px' }}>
-                <span style={{
-                  background: msg.role === 'user' ? '#0070f3' : '#ffffff',
-                  color: msg.role === 'user' ? '#fff' : '#333',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  display: 'inline-block',
-                  maxWidth: '85%',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                  fontSize: '14px',
-                  lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap',
-                  textAlign: 'justify'
-                }}>
-                  {msg.content}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <form onSubmit={sendMessage} style={{ display: 'flex', padding: '12px', backgroundColor: '#fff', borderTop: '1px solid #eee' }}>
-            <input 
-              value={input} 
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)} 
-              style={{ flex: 1, padding: '10px 16px', borderRadius: '20px', border: '1px solid #ddd', outline: 'none', fontSize: '14px' }} 
-              placeholder="Type your question..." 
-              disabled={isLoading}
-            />
-            <button type="submit" style={{ marginLeft: '8px', padding: '0 16px', borderRadius: '20px', backgroundColor: '#0070f3', color: 'white', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 'bold' }} disabled={isLoading}>
-              {isLoading ? '...' : 'Send'}
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Floating Robot UI */}
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          width: '80px',              // Slightly optimized for mobile footprints
-          height: '80px',
-          cursor: 'pointer',
-          transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          transformOrigin: 'bottom center',
-          pointerEvents: 'auto',      // Re-enables clicking on the robot
-          flexShrink: 0
-        }}
-        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <line x1="50" y1="30" x2="50" y2="10" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
-          <circle cx="50" cy="10" r="5" fill={isOpen ? "#22c55e" : "#ef4444"} />
-          
-          <rect x="35" y="70" width="30" height="25" fill="#cbd5e1" rx="4" />
-          <path d="M 25 95 L 75 95 L 85 100 L 15 100 Z" fill="#94a3b8" />
-          
-          <rect x="15" y="25" width="70" height="55" fill="#0070f3" rx="16" />
-          <rect x="25" y="35" width="50" height="30" fill="#1e293b" rx="8" />
-          
-          <circle cx="37" cy="50" r="9" fill="white" />
-          <circle cx="63" cy="50" r="9" fill="white" />
-          
-          <circle cx={37 + pupilOffset.x} cy={50 + pupilOffset.y} r="4" fill="#0f172a" />
-          <circle cx={63 + pupilOffset.x} cy={50 + pupilOffset.y} r="4" fill="#0f172a" />
-        </svg>
+      {/* 头部 (移除了关闭按钮，因为外层网站会处理折叠) */}
+      <div style={{ backgroundColor: '#0070f3', color: 'white', padding: '16px', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', zIndex: 10 }}>
+        <span>Synmac AI Support</span>
       </div>
 
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', backgroundColor: '#e4e4e7' }}>
+        {messages.map((msg, i) => (
+          <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '12px' }}>
+            <span style={{
+              background: msg.role === 'user' ? '#0070f3' : '#ffffff',
+              color: msg.role === 'user' ? '#fff' : '#333',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              display: 'inline-block',
+              maxWidth: '85%',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+              fontSize: '14px',
+              lineHeight: '1.5',
+              whiteSpace: 'pre-wrap',
+              textAlign: 'justify'
+            }}>
+              {msg.content}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <form onSubmit={sendMessage} style={{ display: 'flex', padding: '12px', backgroundColor: '#fff', borderTop: '1px solid #eee' }}>
+        <input 
+          value={input} 
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)} 
+          style={{ flex: 1, padding: '10px 16px', borderRadius: '20px', border: '1px solid #ddd', outline: 'none', fontSize: '14px' }} 
+          placeholder="Type your question..." 
+          disabled={isLoading}
+        />
+        <button type="submit" style={{ marginLeft: '8px', padding: '0 16px', borderRadius: '20px', backgroundColor: '#0070f3', color: 'white', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 'bold' }} disabled={isLoading}>
+          {isLoading ? '...' : 'Send'}
+        </button>
+      </form>
     </div>
   );
 }
