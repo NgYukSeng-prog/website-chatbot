@@ -61,12 +61,29 @@ export default function ChatWidget() {
   };
 
   return (
-    <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999, fontFamily: 'sans-serif' }}>
+    <div style={{ 
+      position: 'fixed', 
+      bottom: '10px', 
+      right: '10px', 
+      zIndex: 9999, 
+      fontFamily: 'sans-serif',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-end',
+      justifyContent: 'flex-end',
+      /* RESPONSIVE MAGIC STARTS HERE */
+      width: 'calc(100vw - 20px)',  // Adapts to small mobile screens safely
+      maxWidth: '350px',            // Caps the width perfectly for Laptops/iPads
+      height: 'calc(100vh - 20px)', // Prevents vertical clipping on mobile
+      maxHeight: '620px',           // Caps total height for standard screens
+      pointerEvents: 'none'         // Allows clicking through empty space
+    }}>
       
       {isOpen && (
         <div style={{
-          width: '350px',
-          height: '500px',
+          width: '100%',
+          flexGrow: 1,                // Auto-expands to fill available height above the robot
+          maxHeight: '500px',         // Caps chat window height
           backgroundColor: '#fff',
           borderRadius: '16px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
@@ -75,17 +92,14 @@ export default function ChatWidget() {
           overflow: 'hidden',
           marginBottom: '16px',
           border: '1px solid #eaeaea',
-          animation: 'fadeIn 0.3s ease'
+          animation: 'fadeIn 0.3s ease',
+          pointerEvents: 'auto'       // Re-enables clicking inside the chat window
         }}>
           <div style={{ backgroundColor: '#0070f3', color: 'white', padding: '16px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Synmac AI Support</span>
-            <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px' }}>✖</button>
+            <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px', padding: '0 5px' }}>✖</button>
           </div>
 
-          {/* 
-            Update 1: Changed backgroundColor from '#f9f9f9' to '#e4e4e7' 
-            to create contrast against the white bot bubbles.
-          */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px', backgroundColor: '#e4e4e7' }}>
             {messages.map((msg, i) => (
               <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '12px' }}>
@@ -96,11 +110,10 @@ export default function ChatWidget() {
                   borderRadius: '12px',
                   display: 'inline-block',
                   maxWidth: '85%',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)', // Slightly stronger shadow
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
                   fontSize: '14px',
                   lineHeight: '1.5',
                   whiteSpace: 'pre-wrap',
-                  // Update 2: Added text-align justify to make the text edges neat
                   textAlign: 'justify'
                 }}>
                   {msg.content}
@@ -113,32 +126,33 @@ export default function ChatWidget() {
             <input 
               value={input} 
               onChange={(e: ChangeEvent<HTMLInputElement>) => setInput(e.target.value)} 
-              style={{ flex: 1, padding: '10px 16px', borderRadius: '20px', border: '1px solid #ddd', outline: 'none' }} 
+              style={{ flex: 1, padding: '10px 16px', borderRadius: '20px', border: '1px solid #ddd', outline: 'none', fontSize: '14px' }} 
               placeholder="Type your question..." 
               disabled={isLoading}
             />
-            <button type="submit" style={{ marginLeft: '8px', padding: '0 16px', borderRadius: '20px', backgroundColor: '#0070f3', color: 'white', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer' }} disabled={isLoading}>
+            <button type="submit" style={{ marginLeft: '8px', padding: '0 16px', borderRadius: '20px', backgroundColor: '#0070f3', color: 'white', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 'bold' }} disabled={isLoading}>
               {isLoading ? '...' : 'Send'}
             </button>
           </form>
         </div>
       )}
 
-      {/* 悬浮机器人 UI */}
+      {/* Floating Robot UI */}
       <div 
         onClick={() => setIsOpen(!isOpen)}
         style={{
-          width: '100px',
-          height: '100px',
-          float: 'right',
+          width: '80px',              // Slightly optimized for mobile footprints
+          height: '80px',
           cursor: 'pointer',
           transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-          transformOrigin: 'bottom center'
+          transformOrigin: 'bottom center',
+          pointerEvents: 'auto',      // Re-enables clicking on the robot
+          flexShrink: 0
         }}
         onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
         onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
       >
-        <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
           <line x1="50" y1="30" x2="50" y2="10" stroke="#94a3b8" strokeWidth="4" strokeLinecap="round" />
           <circle cx="50" cy="10" r="5" fill={isOpen ? "#22c55e" : "#ef4444"} />
           
